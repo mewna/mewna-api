@@ -34,14 +34,14 @@ defmodule ApiWeb.AuthController do
     end)
   end
 
-  defp manages(conn, params, guild) do
+  defp manages(conn, guild) do
     if is_token_valid(conn) do
       user_id = conn |> get_auth_header |> OAuth.get_token_user_id
       manages =
         user_id
         |> get_managed_guilds_for_user
-        |> Enum.filter(fn guild ->
-          guild["id"] == params["id"]
+        |> Enum.filter(fn g ->
+          g["id"] == guild
         end)
         |> length
       manages == 1
@@ -85,7 +85,7 @@ defmodule ApiWeb.AuthController do
 
   def get_guild_config(conn, params) do
     id = params["id"]
-    if manages(conn, params, id) do
+    if manages(conn, id) do
       res =
         HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/config").body
         |> Jason.decode!
@@ -97,13 +97,13 @@ defmodule ApiWeb.AuthController do
 
   def update_guild_config(conn, params) do
     id = params["id"]
-    if manages(conn, params, id) do
+    if manages(conn, id) do
       body =
         params
         |> Map.drop(["id"])
         |> Jason.encode!
       res =
-        HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/config", body).body
+        HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}", body).body
         |> Jason.decode!
       conn |> json(res)
     else
@@ -113,7 +113,7 @@ defmodule ApiWeb.AuthController do
 
   def get_guild_webhooks(conn, params) do
     id = params["id"]
-    if manages(conn, params, id) do
+    if manages(conn, id) do
       res =
         HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/webhooks").body
         |> Jason.decode!
@@ -126,9 +126,21 @@ defmodule ApiWeb.AuthController do
   def delete_guild_webhook(conn, params) do
     id = params["id"]
     webhook = params["webhook"]
-    if manages(conn, params, id) do
+    if manages(conn, id) do
       res =
         HTTPoison.delete!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/webhooks/#{webhook}").body
+        |> Jason.decode!
+      conn |> json(res)
+    else
+      conn |> json(%{})
+    end
+  end
+
+  def update_server_info(conn, params) do
+    id = params["id"]
+    if manages(conn, id) do
+      res =
+        HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}", Jason.encode!(params)).body
         |> Jason.decode!
       conn |> json(res)
     else

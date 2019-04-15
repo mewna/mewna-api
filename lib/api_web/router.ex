@@ -34,9 +34,11 @@ defmodule ApiWeb.Router do
     end
 
     scope "/guild/:id" do
-      get "/leaderboard", GuildController, :leaderboard
-      get "/rewards",     GuildController, :rewards
-      get "/prefix",      GuildController, :prefix
+      get  "/leaderboard", GuildController, :leaderboard
+      get  "/rewards",     GuildController, :rewards
+      get  "/prefix",      GuildController, :prefix
+      get  "/info",        GuildController, :info
+      post "/info",        AuthController,  :update_server_info
     end
 
     scope "/cache" do
