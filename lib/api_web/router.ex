@@ -24,21 +24,37 @@ defmodule ApiWeb.Router do
       get  "/heartbeat", AuthController,  :heartbeat
       post "/logout",    OAuthController, :logout
       scope "/guilds" do
-        get    "/managed",               AuthController, :get_managed_guilds
-        get    "/manages/:id",           AuthController, :user_manages_guild
-        get    "/config/:id",            AuthController, :get_guild_config
-        post   "/config/:id",            AuthController, :update_guild_config
-        get    "/webhooks/:id",          AuthController, :get_guild_webhooks
-        delete "/webhooks/:id/:webhook", AuthController, :delete_guild_webhook
+        get "/managed",  AuthController, :get_managed_guilds
       end
     end
 
     scope "/guild/:id" do
-      get  "/leaderboard", GuildController, :leaderboard
-      get  "/rewards",     GuildController, :rewards
-      get  "/prefix",      GuildController, :prefix
-      get  "/info",        GuildController, :info
-      post "/info",        AuthController,  :update_server_info
+      get    "/manages",           GuildController, :user_manages_guild
+      get    "/leaderboard",       GuildController, :leaderboard
+      get    "/rewards",           GuildController, :rewards
+      get    "/prefix",            GuildController, :prefix
+      get    "/info",              GuildController, :info
+      post   "/info",              GuildController, :update_server_info
+      get    "/config",            GuildController, :get_guild_config
+      post   "/config",            GuildController, :update_guild_config
+      get    "/webhooks",          GuildController, :get_guild_webhooks
+      delete "/webhooks/:webhook", GuildController, :delete_guild_webhook
+    end
+
+    scope "/user" do
+      get  "/:id", UserController, :get_user
+      post "/:id", UserController, :update_user
+    end
+
+    scope "/post" do
+      get "/author/:id",  PostController, :get_author
+      scope "/:id" do
+        post   "/create", PostController, :create
+        get    "/:post",  PostController, :get_post
+        delete "/:post",  PostController, :delete_post
+        put    "/:post",  PostController, :edit_post
+        get    "/posts",  PostController, :get_posts
+      end
     end
 
     scope "/cache" do
