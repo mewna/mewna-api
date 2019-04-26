@@ -29,7 +29,8 @@ defmodule ApiWeb.OAuthController do
           "https://discordapp.com/oauth2/authorize?response_type=code" <>
             "&client_id=#{System.get_env("CLIENT_ID")}" <>
             "&redirect_uri=#{redirect_url}" <>
-            "&scope=#{scopes}"
+            "&scope=#{scopes}" <>
+            "&prompt=none"
       )
   end
 
