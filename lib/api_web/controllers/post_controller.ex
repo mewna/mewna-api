@@ -28,7 +28,7 @@ defmodule ApiWeb.PostController do
       res =
         HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/create", body).body
         |> Jason.decode!
-      conn |> json(res)
+      conn |> pack(res)
     else
       invalid_auth_header conn
     end
@@ -40,7 +40,7 @@ defmodule ApiWeb.PostController do
     res =
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/#{post}").body
       |> Jason.decode!
-    conn |> json(res)
+    conn |> pack(res)
   end
 
   def get_author(conn, params) do
@@ -48,7 +48,7 @@ defmodule ApiWeb.PostController do
     res =
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/post/author/#{id}").body
       |> Jason.decode!
-    conn |> json(res)
+    conn |> pack(res)
   end
 
   def delete_post(conn, params) do
@@ -58,7 +58,7 @@ defmodule ApiWeb.PostController do
       res =
         HTTPoison.delete!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/#{post}").body
         |> Jason.decode!
-      conn |> json(res)
+      conn |> pack(res)
     else
       invalid_auth_header conn
     end
@@ -95,7 +95,7 @@ defmodule ApiWeb.PostController do
         res =
           HTTPoison.put!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/#{post}", body).body
           |> Jason.decode!
-        conn |> json(res)
+        conn |> pack(res)
       end
     else
       invalid_auth_header conn
@@ -108,6 +108,6 @@ defmodule ApiWeb.PostController do
     res =
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/posts").body
       |> Jason.decode!
-    conn |> json(res)
+    conn |> pack(res)
   end
 end

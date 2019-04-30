@@ -4,6 +4,6 @@ defmodule ApiWeb.ApiController do
   # Fucking CORS man
 
   def options(conn, _params) do
-    conn |> json(%{})
+    conn |> pack(%{})
   end
 end

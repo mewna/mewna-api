@@ -41,6 +41,7 @@ defmodule Api.MixProject do
       {:httpoison, "~> 1.5"},
       {:redix, ">= 0.0.0"},
       {:cors_plug, "~> 2.0"},
+      {:msgpax, "~> 2.2"},
     ]
   end
 end

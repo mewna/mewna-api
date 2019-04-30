@@ -24,6 +24,13 @@ defmodule ApiWeb do
       import Plug.Conn
       import ApiWeb.Gettext
       alias ApiWeb.Router.Helpers, as: Routes
+
+      def pack(conn, data) do
+        body = Msgpax.pack! data, iodata: false
+        conn
+        |> put_resp_header("content-type", ApiWeb.PackParser.mime())
+        |> Plug.Conn.send_resp(conn.status || 200, body)
+      end
     end
   end
 

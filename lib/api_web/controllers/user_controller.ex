@@ -18,7 +18,7 @@ defmodule ApiWeb.UserController do
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/user/#{id}").body
       |> Jason.decode!
     conn
-    |> json(res)
+    |> pack(res)
   end
 
   def update_user(conn, params) do
@@ -30,11 +30,10 @@ defmodule ApiWeb.UserController do
         |> Jason.encode!
       res =
         HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/user/#{id}", body).body
-      IO.inspect res, pretty: true
       res =
         res
         |> Jason.decode!
-      conn |> json(res)
+      conn |> pack(res)
     else
       invalid_auth_header conn
     end

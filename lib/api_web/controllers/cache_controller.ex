@@ -7,7 +7,7 @@ defmodule ApiWeb.CacheController do
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/cache/user/#{id}").body
       |> Jason.decode!
     conn
-    |> json(res)
+    |> pack(res)
   end
 
   def guild(conn, params) do
@@ -16,7 +16,7 @@ defmodule ApiWeb.CacheController do
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/cache/guild/#{id}").body
       |> Jason.decode!
     conn
-    |> json(res)
+    |> pack(res)
   end
 
   def channels(conn, params) do
@@ -25,7 +25,7 @@ defmodule ApiWeb.CacheController do
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/cache/guild/#{id}/channels").body
       |> Jason.decode!
     conn
-    |> json(res)
+    |> pack(res)
   end
 
   def roles(conn, params) do
@@ -34,6 +34,6 @@ defmodule ApiWeb.CacheController do
       HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/cache/guild/#{id}/roles").body
       |> Jason.decode!
     conn
-    |> json(res)
+    |> pack(res)
   end
 end
