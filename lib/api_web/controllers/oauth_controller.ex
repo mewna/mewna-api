@@ -1,8 +1,11 @@
 defmodule ApiWeb.OAuthController do
   use ApiWeb, :controller
   alias Api.OAuth
+  alias Api.Env
 
   @scopes "identify guilds email guilds.join connections"
+
+  def scopes, do: @scopes
 
   defp get_auth_header(conn) do
     conn |> get_req_header("authorization") |> hd
@@ -21,16 +24,16 @@ defmodule ApiWeb.OAuthController do
   end
 
   def login_start(conn, _params) do
-    redirect_url = URI.encode_www_form "#{System.get_env("API_URL")}/api/oauth/login/finish"
+    redirect_url = URI.encode_www_form "#{Env.api_url()}/api/oauth/login/finish"
     scopes = URI.encode_www_form @scopes
     conn
     |> redirect(
         external:
-          "https://discordapp.com/oauth2/authorize?response_type=code" <>
-            "&client_id=#{System.get_env("CLIENT_ID")}" <>
-            "&redirect_uri=#{redirect_url}" <>
-            "&scope=#{scopes}" <>
-            "&prompt=none"
+          "https://discordapp.com/oauth2/authorize?response_type=code"
+            <> "&client_id=#{Env.client_id()}"
+            <> "&redirect_uri=#{redirect_url}"
+            <> "&scope=#{scopes}"
+            <> "&prompt=none"
       )
   end
 
@@ -44,10 +47,10 @@ defmodule ApiWeb.OAuthController do
       """)
     else
       scopes = URI.encode_www_form @scopes
-      redirect_url = URI.encode_www_form "#{System.get_env("API_URL")}/api/oauth/login/finish"
+      redirect_url = URI.encode_www_form "#{Env.api_url()}/api/oauth/login/finish"
       data = [
-        "client_id=#{System.get_env("CLIENT_ID")}",
-        "client_secret=#{System.get_env("CLIENT_SECRET")}",
+        "client_id=#{Env.client_id()}",
+        "client_secret=#{Env.client_secret()}",
         "grant_type=authorization_code",
         "code=#{params["code"]}",
         "redirect_uri=#{redirect_url}",
@@ -66,14 +69,23 @@ defmodule ApiWeb.OAuthController do
         end
 
       token = res["access_token"]
+      cached_tokens = OAuth.with_expires_at res
+
+      # Fetch and cache the user
       user =
         OAuth.get_user(token)
         |> OAuth.cache_user()
+      user_id = user["id"]
 
+      # Cache their OAuth tokens
+      cached_tokens
+      |> OAuth.cache_tokens(user_id)
+
+      # Fetch and cache their guilds
       OAuth.get_guilds(token)
-      |> OAuth.cache_guilds(user["id"])
+      |> OAuth.cache_guilds(user_id)
 
-      api_token = OAuth.generate_token user["id"]
+      api_token = OAuth.generate_token user_id
 
       auth_data =
         %{
@@ -93,15 +105,59 @@ defmodule ApiWeb.OAuthController do
     end
   end
 
+  def addbot_start(conn, params) do
+    guild_id = params["guild"]
+    redirect_url = URI.encode_www_form "#{Env.api_url()}/api/oauth/addbot/finish"
+    conn
+    |> redirect(
+      external:
+        "https://discordapp.com/oauth2/authorize?response_type=code"
+          <> "&client_id=#{Env.client_id()}"
+          <> "&redirect_uri=#{redirect_url}"
+          <> "&scope=bot"
+          <> "&permissions=8"
+          <> "&guild_id=#{guild_id}"
+    )
+  end
+
+  def addbot_finish(conn, params) do
+    if params["error"] do
+      conn
+      |> html("""
+      <script>
+      self.close();
+      </script>
+      """)
+    else
+      # It's a hack, but it forces us to wait until it's actually cached
+      # TODO: Should the timeout be higher?
+      Process.sleep 250
+
+      result =
+        %{
+          "type" => "addbot",
+          "guild" => params["guild_id"],
+        }
+
+      conn
+      |> html("""
+      <script>
+      window.opener.postMessage(#{Jason.encode!(result)}, "*");
+      self.close();
+      </script>
+      """)
+    end
+  end
+
   def webhook_start(conn, _params) do
-    redirect_url = URI.encode_www_form "#{System.get_env("API_URL")}/api/oauth/webhooks/finish"
+    redirect_url = URI.encode_www_form "#{Env.api_url()}/api/oauth/webhooks/finish"
     conn
     |> redirect(
         external:
-          "https://discordapp.com/oauth2/authorize?response_type=code" <>
-            "&client_id=#{System.get_env("WEBHOOK_CLIENT_ID")}" <>
-            "&redirect_uri=#{redirect_url}" <>
-            "&scope=webhook.incoming"
+          "https://discordapp.com/oauth2/authorize?response_type=code"
+            <> "&client_id=#{Env.webhook_client_id()}"
+            <> "&redirect_uri=#{redirect_url}"
+            <> "&scope=webhook.incoming"
       )
   end
 
@@ -114,10 +170,10 @@ defmodule ApiWeb.OAuthController do
       </script>
       """)
     else
-      redirect_url = URI.encode_www_form "#{System.get_env("API_URL")}/api/oauth/webhooks/finish"
+      redirect_url = URI.encode_www_form "#{Env.api_url()}/api/oauth/webhooks/finish"
       data = [
-        "client_id=#{System.get_env("WEBHOOK_CLIENT_ID")}",
-        "client_secret=#{System.get_env("WEBHOOK_CLIENT_SECRET")}",
+        "client_id=#{Env.webhook_client_id()}",
+        "client_secret=#{Env.webhook_client_secret()}",
         "grant_type=authorization_code",
         "code=#{params["code"]}",
         "redirect_uri=#{redirect_url}",
@@ -143,7 +199,7 @@ defmodule ApiWeb.OAuthController do
       }
 
       HTTPoison.post!(
-        System.get_env("INTERNAL_API") <> "/v3/guild/#{webhook["guild"]}/webhooks/add",
+        "#{Env.internal_api()}/v3/guild/#{webhook["guild"]}/webhooks/add",
         Jason.encode!(webhook),
         [{"Content-Type", "application/json"}]
       )
@@ -160,8 +216,10 @@ defmodule ApiWeb.OAuthController do
 
   def logout(conn, _params) do
     if is_token_valid(conn) do
-      conn |> get_auth_header |> OAuth.logout
+      conn
+      |> get_auth_header
+      |> OAuth.logout
     end
-    conn |> text("")
+    conn |> pack(%{})
   end
 end

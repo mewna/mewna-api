@@ -1,4 +1,6 @@
 defmodule Api.Redis do
+  alias Api.Env
+
   @pool_size 5
 
   def child_spec(_args) do
@@ -6,9 +8,9 @@ defmodule Api.Redis do
     children =
       for i <- 0..(@pool_size - 1) do
         Supervisor.child_spec({Redix, [
-            host: System.get_env("REDIS_HOST"),
+            host: Env.redis_host(),
             port: 6379,
-            password: System.get_env("REDIS_AUTH"),
+            password: Env.redis_auth(),
             name: :"redix_#{i}"
           ]}, id: {Redix, i})
       end

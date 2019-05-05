@@ -14,6 +14,10 @@ defmodule ApiWeb.Router do
         get "/start",  OAuthController, :login_start
         get "/finish", OAuthController, :login_finish
       end
+      scope "/addbot" do
+        get "/start",  OAuthController, :addbot_start
+        get "/finish", OAuthController, :addbot_finish
+      end
       scope "/webhooks" do
         get "/start",  OAuthController, :webhook_start
         get "/finish", OAuthController, :webhook_finish

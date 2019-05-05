@@ -1,6 +1,7 @@
 defmodule ApiWeb.PostController do
   use ApiWeb, :controller
   import Api.AuthHelper
+  alias Api.Env
 
   defp verify_user_or_guild(conn, check_id) do
     if is_token_valid(conn) do
@@ -26,7 +27,7 @@ defmodule ApiWeb.PostController do
         |> Map.drop(["id"])
         |> Jason.encode!
       res =
-        HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/create", body).body
+        HTTPoison.post!("#{Env.internal_api()}/v3/post/#{id}/create", body).body
         |> Jason.decode!
       conn |> pack(res)
     else
@@ -38,7 +39,7 @@ defmodule ApiWeb.PostController do
     id = params["id"]
     post = params["post"]
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/#{post}").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/post/#{id}/#{post}").body
       |> Jason.decode!
     conn |> pack(res)
   end
@@ -46,7 +47,7 @@ defmodule ApiWeb.PostController do
   def get_author(conn, params) do
     id = params["id"]
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/post/author/#{id}").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/post/author/#{id}").body
       |> Jason.decode!
     conn |> pack(res)
   end
@@ -56,7 +57,7 @@ defmodule ApiWeb.PostController do
     post = params["post"]
     if verify_user_or_guild(conn, id) do
       res =
-        HTTPoison.delete!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/#{post}").body
+        HTTPoison.delete!("#{Env.internal_api()}/v3/post/#{id}/#{post}").body
         |> Jason.decode!
       conn |> pack(res)
     else
@@ -69,7 +70,7 @@ defmodule ApiWeb.PostController do
     post = params["post"]
     if verify_user_or_guild(conn, id) do
       res =
-        HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/#{post}").body
+        HTTPoison.get!("#{Env.internal_api()}/v3/post/#{id}/#{post}").body
         |> Jason.decode!
       # Verify that they actually authored this post and thus should be allowed to edit it
       # It's easier to do this here than to pass it off to the backend
@@ -93,7 +94,7 @@ defmodule ApiWeb.PostController do
           |> Map.drop(["id", "post"])
           |> Jason.encode!
         res =
-          HTTPoison.put!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/#{post}", body).body
+          HTTPoison.put!("#{Env.internal_api()}/v3/post/#{id}/#{post}", body).body
           |> Jason.decode!
         conn |> pack(res)
       end
@@ -106,7 +107,7 @@ defmodule ApiWeb.PostController do
     id = params["id"]
     # TODO: Post offset...?
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/post/#{id}/posts").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/post/#{id}/posts").body
       |> Jason.decode!
     conn |> pack(res)
   end

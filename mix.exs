@@ -42,6 +42,8 @@ defmodule Api.MixProject do
       {:redix, ">= 0.0.0"},
       {:cors_plug, "~> 2.0"},
       {:msgpax, "~> 2.2"},
+
+      {:emily, github: "mewna/emily"}
     ]
   end
 end

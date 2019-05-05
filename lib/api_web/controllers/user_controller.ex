@@ -1,6 +1,7 @@
 defmodule ApiWeb.UserController do
   use ApiWeb, :controller
   import Api.AuthHelper
+  alias Api.Env
 
   defp verify_user(conn, check_id) do
     if is_token_valid(conn) do
@@ -15,7 +16,7 @@ defmodule ApiWeb.UserController do
   def get_user(conn, params) do
     id = params["id"]
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/user/#{id}").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/user/#{id}").body
       |> Jason.decode!
     conn
     |> pack(res)
@@ -29,7 +30,7 @@ defmodule ApiWeb.UserController do
         |> Map.drop(["id"])
         |> Jason.encode!
       res =
-        HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/user/#{id}", body).body
+        HTTPoison.post!("#{Env.internal_api()}/v3/user/#{id}", body).body
       res =
         res
         |> Jason.decode!

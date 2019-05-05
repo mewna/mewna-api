@@ -2,6 +2,7 @@ defmodule ApiWeb.GuildController do
   use ApiWeb, :controller
   import Api.AuthHelper
   alias Api.OAuth
+  alias Api.Env
 
   def user_manages_guild(conn, params) do
     if is_token_valid(conn) do
@@ -22,7 +23,7 @@ defmodule ApiWeb.GuildController do
     id = params["id"]
     if manages(conn, id) do
       res =
-        HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/config").body
+        HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}/config").body
         |> Jason.decode!
       conn |> pack(res)
     else
@@ -38,7 +39,7 @@ defmodule ApiWeb.GuildController do
         |> Map.drop(["id"])
         |> Jason.encode!
       res =
-        HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/config", body).body
+        HTTPoison.post!("#{Env.internal_api()}/v3/guild/#{id}/config", body).body
         |> Jason.decode!
       conn |> pack(res)
     else
@@ -50,7 +51,7 @@ defmodule ApiWeb.GuildController do
     id = params["id"]
     if manages(conn, id) do
       res =
-        HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/webhooks").body
+        HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}/webhooks").body
         |> Jason.decode!
       conn |> pack(res)
     else
@@ -63,7 +64,7 @@ defmodule ApiWeb.GuildController do
     webhook = params["webhook"]
     if manages(conn, id) do
       res =
-        HTTPoison.delete!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/webhooks/#{webhook}").body
+        HTTPoison.delete!("#{Env.internal_api()}/v3/guild/#{id}/webhooks/#{webhook}").body
         |> Jason.decode!
       conn |> pack(res)
     else
@@ -74,7 +75,7 @@ defmodule ApiWeb.GuildController do
   def info(conn, params) do
     id = params["id"]
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}").body
       |> Jason.decode!
     conn
     |> pack(res)
@@ -84,7 +85,7 @@ defmodule ApiWeb.GuildController do
     id = params["id"]
     if manages(conn, id) do
       res =
-        HTTPoison.post!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}", Jason.encode!(params)).body
+        HTTPoison.post!("#{Env.internal_api()}/v3/guild/#{id}", Jason.encode!(params)).body
         |> Jason.decode!
       conn |> pack(res)
     else
@@ -95,7 +96,7 @@ defmodule ApiWeb.GuildController do
   def leaderboard(conn, params) do
     id = params["id"]
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/leaderboard").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}/leaderboard").body
       |> Jason.decode!
     conn
     |> pack(res)
@@ -104,7 +105,7 @@ defmodule ApiWeb.GuildController do
   def rewards(conn, params) do
     id = params["id"]
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/rewards").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}/rewards").body
       |> Jason.decode!
     conn
     |> pack(res)
@@ -113,7 +114,7 @@ defmodule ApiWeb.GuildController do
   def prefix(conn, params) do
     id = params["id"]
     res =
-      HTTPoison.get!("#{System.get_env("INTERNAL_API")}/v3/guild/#{id}/prefix").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}/prefix").body
       |> Jason.decode!
     conn
     |> pack(res)
