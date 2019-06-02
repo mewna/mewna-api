@@ -5,6 +5,7 @@ defmodule Api.AuthHelper do
   alias Api.OAuth
 
   @manage_guild 0x00000020
+  @admin 0x00000008
 
   def get_auth_header(conn) do
     conn |> get_req_header("authorization") |> hd
@@ -32,6 +33,8 @@ defmodule Api.AuthHelper do
     OAuth.get_cached_guilds(user_id)
     |> Enum.filter(fn guild ->
       (guild["permissions"] &&& @manage_guild) == @manage_guild
+      or
+      (guild["permissions"] &&& @admin) == @admin
     end)
   end
 
@@ -39,6 +42,8 @@ defmodule Api.AuthHelper do
     OAuth.get_cached_guilds(user_id)
     |> Enum.filter(fn guild ->
       (guild["permissions"] &&& @manage_guild) != @manage_guild
+      and
+      (guild["permissions"] &&& @admin) != @admin
     end)
   end
 

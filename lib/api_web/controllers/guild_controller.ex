@@ -95,8 +95,28 @@ defmodule ApiWeb.GuildController do
 
   def leaderboard(conn, params) do
     id = params["id"]
+    p_after = params["after"]
+    p_after =
+      if p_after do
+        parse = Integer.parse p_after
+        case parse do
+          {x, _} when is_integer(x) ->
+            x
+          :error ->
+            nil
+        end
+      else
+        nil
+      end
+    query =
+      case p_after do
+        nil ->
+          ""
+        _ ->
+          "?after=#{p_after}"
+      end
     res =
-      HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}/leaderboard").body
+      HTTPoison.get!("#{Env.internal_api()}/v3/guild/#{id}/leaderboard#{query}").body
       |> Jason.decode!
     conn
     |> pack(res)
