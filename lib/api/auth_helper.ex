@@ -35,6 +35,13 @@ defmodule Api.AuthHelper do
     end)
   end
 
+  def get_unmanaged_guilds_for_user(user_id) do
+    OAuth.get_cached_guilds(user_id)
+    |> Enum.filter(fn guild ->
+      (guild["permissions"] &&& @manage_guild) != @manage_guild
+    end)
+  end
+
   def manages(conn, guild) do
     if is_token_valid(conn) do
       user_id = conn |> get_auth_header |> OAuth.get_token_user_id

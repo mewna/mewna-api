@@ -28,7 +28,8 @@ defmodule ApiWeb.Router do
       get  "/heartbeat", AuthController,  :heartbeat
       post "/logout",    OAuthController, :logout
       scope "/guilds" do
-        get "/managed",  AuthController, :get_managed_guilds
+        get "/managed",    AuthController, :get_managed_guilds
+        get "/unmanaged",  AuthController, :get_unmanaged_guilds
       end
     end
 
