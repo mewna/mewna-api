@@ -15,7 +15,15 @@ defmodule ApiWeb.PackParser do
     {:ok, state} = opts
     if "#{type}/#{subtype}" == @mime do
       {:ok, body, conn} = Plug.Conn.read_body conn, state
-      unpacked = Msgpax.unpack! body
+      unpacked =
+        case body do
+          <<192>> ->
+            # If there is no request body, it gets encoded to 0xC0 `nil` by
+            # msgpack, and 0xC0 is dec. 192.
+            %{}
+          _ ->
+            Msgpax.unpack! body
+        end
       {:ok, unpacked, conn}
     else
       {:next, conn}

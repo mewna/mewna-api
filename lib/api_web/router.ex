@@ -27,6 +27,7 @@ defmodule ApiWeb.Router do
     scope "/auth" do
       get  "/heartbeat", AuthController,  :heartbeat
       post "/logout",    OAuthController, :logout
+      get  "/homepage",  UserController, :get_homepage
       scope "/guilds" do
         get "/managed",    AuthController, :get_managed_guilds
         get "/unmanaged",  AuthController, :get_unmanaged_guilds
@@ -44,11 +45,16 @@ defmodule ApiWeb.Router do
       post   "/config",            GuildController, :update_guild_config
       get    "/webhooks",          GuildController, :get_guild_webhooks
       delete "/webhooks/:webhook", GuildController, :delete_guild_webhook
+      scope "/levels" do
+        scope "/import" do
+          post "/mee6", GuildController, :import_mee6_levels
+        end
+      end
     end
 
     scope "/user" do
-      get  "/:id", UserController, :get_user
-      post "/:id", UserController, :update_user
+      get  "/:id",      UserController, :get_user
+      post "/:id",      UserController, :update_user
     end
 
     scope "/post" do

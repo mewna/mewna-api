@@ -47,6 +47,19 @@ defmodule ApiWeb.GuildController do
     end
   end
 
+  def import_mee6_levels(conn, params) do
+    id = params["id"]
+    if manages(conn, id) do
+      res =
+        HTTPoison.post!("${Env.internal_api()}/v3/guild/#{id}/levels/import/mee6")
+        |> Jason.decode!
+      conn |> pack(res)
+    else
+      conn
+      |> pack(%{})
+    end
+  end
+
   def get_guild_webhooks(conn, params) do
     id = params["id"]
     if manages(conn, id) do
