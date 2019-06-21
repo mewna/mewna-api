@@ -51,7 +51,7 @@ defmodule ApiWeb.GuildController do
     id = params["id"]
     if manages(conn, id) do
       res =
-        HTTPoison.post!("${Env.internal_api()}/v3/guild/#{id}/levels/import/mee6")
+        HTTPoison.post!("${Env.internal_api()}/v3/guild/#{id}/levels/import/mee6", "")
         |> Jason.decode!
       conn |> pack(res)
     else

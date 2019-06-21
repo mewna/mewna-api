@@ -7,7 +7,14 @@ defmodule ApiWeb.AuthController do
   def heartbeat(conn, _params) do
     if is_token_valid(conn) do
       user_id = conn |> get_auth_header |> OAuth.get_token_user_id
-      conn |> pack(OAuth.get_cached_user(user_id))
+      user = OAuth.get_cached_user user_id
+      conn |> pack(%{
+        "avatar" => user["avatar"],
+        "discriminator" => user["discriminator"],
+        "id" => user["id"],
+        "locale" => user["locale"],
+        "username" => user["username"],
+      })
     else
       invalid_auth_header conn
     end
